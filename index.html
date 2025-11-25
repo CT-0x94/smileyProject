@@ -10,7 +10,7 @@
       align-items: center;
       height: 100vh;
       margin: 0;
-      background: #f0f0f0;
+      background: linear-gradient(#87cefa, #f0f0f0);
       font-family: sans-serif;
     }
 
@@ -21,6 +21,14 @@
       border-radius: 50%;
       border: 5px solid #333;
       position: relative;
+      animation: wobble 4s infinite ease-in-out;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+
+    @keyframes wobble {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+      100% { transform: translateY(0px); }
     }
 
     .eye {
@@ -45,6 +53,7 @@
       position: absolute;
       top: 17px;
       left: 17px;
+      transition: transform 0.1s ease-out;
     }
 
     .mouth {
@@ -55,19 +64,49 @@
       position: absolute;
       bottom: 50px;
       left: 70px;
+      transition: all 0.3s ease;
+    }
+
+    .mouth.surprised {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 8px solid #333;
+      bottom: 60px;
+      left: 110px;
+    }
+
+    .eyelid {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: yellow;
+      top: -100%;
+      transition: top 0.1s;
+    }
+
+    .blink {
+      top: 0%;
     }
   </style>
 </head>
 
 <body>
   <div class="face">
-    <div class="eye left"><div class="pupil"></div></div>
-    <div class="eye right"><div class="pupil"></div></div>
+    <div class="eye left">
+      <div class="pupil"></div>
+      <div class="eyelid"></div>
+    </div>
+    <div class="eye right">
+      <div class="pupil"></div>
+      <div class="eyelid"></div>
+    </div>
     <div class="mouth"></div>
   </div>
 
   <script>
     const eyes = document.querySelectorAll('.eye');
+    const mouth = document.querySelector('.mouth');
 
     document.addEventListener('mousemove', (e) => {
       eyes.forEach(eye => {
@@ -82,7 +121,34 @@
         pupil.style.transform =
           `translate(${Math.sin(angle)*offset}px, ${Math.cos(angle)*offset}px)`;
       });
+
+      // change mouth when close
+      const faceRect = document.querySelector('.face').getBoundingClientRect();
+      const dist = Math.hypot(
+        e.clientX - (faceRect.left + faceRect.width/2),
+        e.clientY - (faceRect.top + faceRect.height/2)
+      );
+
+      if (dist < 120) {
+        mouth.classList.add("surprised");
+      } else {
+        mouth.classList.remove("surprised");
+      }
     });
+
+    // blinking
+    const lids = document.querySelectorAll('.eyelid');
+
+    function blink() {
+      lids.forEach(lid => lid.classList.add('blink'));
+      setTimeout(() => {
+        lids.forEach(lid => lid.classList.remove('blink'));
+      }, 150);
+    }
+
+    setInterval(() => {
+      if (Math.random() > 0.5) blink();
+    }, 3000);
   </script>
 </body>
 </html>
